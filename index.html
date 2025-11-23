@@ -1,0 +1,3190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IslamicTube - Islamic Video Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-analytics-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #0652DD;
+            --secondary-color: #EA2027;
+            --dark-color: #0f0f0f;
+            --dark-secondary: #272727;
+            --dark-tertiary: #3d3d3d;
+            --light-color: #f1f1f1;
+            --gray-color: #aaaaaa;
+            --success-color: #28a745;
+        }
+
+        body {
+            background-color: var(--dark-color);
+            color: var(--light-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--dark-color);
+            padding: 0 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 56px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo i {
+            color: var(--secondary-color);
+            font-size: 28px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover i {
+            transform: scale(1.1);
+        }
+
+        .logo h1 {
+            font-size: 20px;
+            color: var(--light-color);
+            font-weight: 600;
+        }
+
+        .search-bar {
+            display: flex;
+            flex: 0 1 728px;
+            margin: 0 40px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 10px 16px;
+            background-color: var(--dark-secondary);
+            border: 1px solid var(--dark-tertiary);
+            border-radius: 20px 0 0 20px;
+            font-size: 16px;
+            color: var(--light-color);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(6, 82, 221, 0.2);
+            outline: none;
+        }
+
+        .search-bar button {
+            background-color: var(--dark-tertiary);
+            border: 1px solid var(--dark-tertiary);
+            border-left: none;
+            padding: 10px 20px;
+            border-radius: 0 20px 20px 0;
+            cursor: pointer;
+            color: var(--light-color);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar button:hover {
+            background-color: var(--dark-secondary);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .notification-bell:hover {
+            background-color: var(--dark-secondary);
+        }
+
+        .notification-count {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: var(--secondary-color);
+            color: white;
+            font-size: 12px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .user-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: var(--light-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .user-actions button:hover {
+            background-color: var(--dark-secondary);
+        }
+
+        .sign-in-btn {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+
+        .sign-in-btn:hover {
+            background-color: #0540b3 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(6, 82, 221, 0.3);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 4px 12px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .user-profile:hover {
+            background-color: var(--dark-secondary);
+        }
+
+        .profile-pic {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: var(--dark-secondary);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            z-index: 90;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            flex: 1;
+            max-width: 80px;
+        }
+
+        .nav-item:hover {
+            background-color: var(--dark-tertiary);
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item span {
+            font-size: 12px;
+        }
+
+        /* Main Content Styles */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-bottom: 70px;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .categories {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .categories::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .categories::-webkit-scrollbar-thumb {
+            background-color: var(--dark-tertiary);
+            border-radius: 3px;
+        }
+
+        .category-btn {
+            background-color: var(--dark-secondary);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 16px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            color: var(--light-color);
+        }
+
+        .category-btn.active {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+        }
+
+        .category-btn:hover {
+            background-color: var(--dark-tertiary);
+            transform: translateY(-2px);
+        }
+
+        .category-btn.active:hover {
+            background-color: var(--light-color);
+        }
+
+        .videos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .video-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .video-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .thumbnail {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            background-color: var(--dark-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .thumbnail img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .video-card:hover .thumbnail img {
+            transform: scale(1.05);
+        }
+
+        .duration {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .video-info {
+            display: flex;
+            margin-top: 12px;
+            padding: 0 8px;
+        }
+
+        .channel-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            margin-right: 12px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+
+        .video-card:hover .channel-icon {
+            transform: scale(1.1);
+        }
+
+        .video-details {
+            flex: 1;
+        }
+
+        .video-title {
+            font-weight: 500;
+            margin-bottom: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+        }
+
+        .channel-name {
+            color: var(--gray-color);
+            font-size: 14px;
+            margin-bottom: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .video-card:hover .channel-name {
+            color: var(--light-color);
+        }
+
+        .video-meta {
+            color: var(--gray-color);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Shorts Grid */
+        .shorts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .short-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .short-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .short-thumbnail {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 177.78%; /* 9:16 aspect ratio for shorts */
+            background-color: var(--dark-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .short-thumbnail img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .short-card:hover .short-thumbnail img {
+            transform: scale(1.05);
+        }
+
+        .short-info {
+            margin-top: 8px;
+            padding: 0 4px;
+        }
+
+        .short-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            line-height: 1.4;
+            font-size: 14px;
+        }
+
+        .short-views {
+            color: var(--gray-color);
+            font-size: 12px;
+        }
+
+        /* Video Player Styles */
+        .video-player-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .video-player {
+            width: 80%;
+            max-width: 1000px;
+            background-color: var(--dark-color);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: scaleUp 0.3s ease;
+        }
+
+        @keyframes scaleUp {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px;
+            background-color: var(--dark-secondary);
+        }
+
+        .player-header h2 {
+            color: white;
+            font-size: 18px;
+        }
+
+        .close-player {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .close-player:hover {
+            transform: rotate(90deg);
+        }
+
+        .video-iframe {
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%;
+            position: relative;
+        }
+
+        .video-iframe iframe {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px;
+            background-color: var(--dark-secondary);
+        }
+
+        .player-controls button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .player-controls button:hover {
+            background-color: var(--dark-tertiary);
+            transform: translateY(-2px);
+        }
+
+        .fullscreen-btn {
+            background-color: var(--primary-color) !important;
+        }
+
+        .fullscreen-btn:hover {
+            background-color: #0540b3 !important;
+        }
+
+        /* Shorts Player Styles */
+        .shorts-player-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dark-color);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .shorts-player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background-color: rgba(0, 0, 0, 0.7);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 10;
+        }
+
+        .shorts-player-header h2 {
+            color: white;
+            font-size: 18px;
+        }
+
+        .close-shorts {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .close-shorts:hover {
+            transform: rotate(90deg);
+        }
+
+        .shorts-player {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .short-video-iframe {
+            width: 100%;
+            max-width: 400px;
+            height: 100%;
+            max-height: 90vh;
+            border: none;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .shorts-controls {
+            position: absolute;
+            right: 20px;
+            bottom: 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .short-control-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .short-control-btn i {
+            font-size: 24px;
+            background-color: rgba(0, 0, 0, 0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .short-control-btn span {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .short-control-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .shorts-navigation {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+        }
+
+        .shorts-nav-left, .shorts-nav-right {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+
+        .shorts-nav-left:hover, .shorts-nav-right:hover {
+            opacity: 0.7;
+        }
+
+        .nav-icon {
+            font-size: 40px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Video Detail View (Mobile Style) */
+        .video-detail-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dark-color);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .video-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background-color: var(--dark-secondary);
+        }
+
+        .video-detail-header h2 {
+            color: white;
+            font-size: 18px;
+        }
+
+        .close-detail {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .close-detail:hover {
+            transform: rotate(90deg);
+        }
+
+        .video-detail-player {
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%;
+            position: relative;
+        }
+
+        .video-detail-player iframe {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-detail-info {
+            padding: 16px;
+        }
+
+        .video-detail-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .video-detail-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--dark-tertiary);
+        }
+
+        .video-detail-views {
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+
+        .video-detail-actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .video-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: none;
+            border: none;
+            color: var(--gray-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .video-action-btn:hover {
+            color: var(--light-color);
+        }
+
+        .video-action-btn i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .video-action-btn span {
+            font-size: 12px;
+        }
+
+        .channel-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--dark-tertiary);
+        }
+
+        .channel-detail-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .channel-detail-info {
+            flex: 1;
+        }
+
+        .channel-detail-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .channel-detail-subs {
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+
+        .subscribe-btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .subscribe-btn:hover {
+            background-color: #c41a1a;
+        }
+
+        .video-description {
+            background-color: var(--dark-secondary);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .description-text {
+            color: var(--light-color);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .related-videos {
+            padding: 0 16px 16px;
+        }
+
+        .related-videos h3 {
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .related-video-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+        }
+
+        .related-thumbnail {
+            width: 120px;
+            height: 68px;
+            border-radius: 8px;
+            background-color: var(--dark-secondary);
+            overflow: hidden;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .related-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .related-duration {
+            position: absolute;
+            bottom: 4px;
+            right: 4px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 2px 4px;
+            border-radius: 2px;
+            font-size: 10px;
+        }
+
+        .related-info {
+            flex: 1;
+        }
+
+        .related-title {
+            font-weight: 500;
+            font-size: 14px;
+            margin-bottom: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .related-channel {
+            color: var(--gray-color);
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .related-meta {
+            color: var(--gray-color);
+            font-size: 12px;
+        }
+
+        /* Downloads Page */
+        .downloads-container {
+            padding: 16px;
+        }
+
+        .downloads-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .download-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            background-color: var(--dark-secondary);
+            border-radius: 8px;
+        }
+
+        .download-thumbnail {
+            width: 120px;
+            height: 68px;
+            border-radius: 8px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .download-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .download-info {
+            flex: 1;
+        }
+
+        .download-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .download-meta {
+            color: var(--gray-color);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .download-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .download-action-btn {
+            background: none;
+            border: none;
+            color: var(--gray-color);
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .download-action-btn:hover {
+            color: var(--light-color);
+        }
+
+        /* Notification Panel */
+        .notification-panel {
+            position: fixed;
+            top: 56px;
+            right: 20px;
+            width: 350px;
+            background-color: var(--dark-secondary);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            padding: 16px;
+            display: none;
+            z-index: 101;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .notification-panel h3 {
+            margin-bottom: 16px;
+            color: var(--light-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-notifications {
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--gray-color);
+            transition: transform 0.3s ease;
+        }
+
+        .close-notifications:hover {
+            transform: rotate(90deg);
+        }
+
+        .notification-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .notification-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .notification-list::-webkit-scrollbar-thumb {
+            background-color: var(--dark-tertiary);
+            border-radius: 3px;
+        }
+
+        .notification-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--dark-tertiary);
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+        }
+
+        .notification-item:hover {
+            background-color: var(--dark-tertiary);
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+
+        .notification-time {
+            color: var(--gray-color);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        /* Authentication Modal */
+        .auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .auth-container {
+            background-color: var(--dark-secondary);
+            border-radius: 12px;
+            width: 400px;
+            max-width: 90%;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: scaleUp 0.3s ease;
+        }
+
+        .auth-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .auth-header h2 {
+            color: var(--light-color);
+        }
+
+        .close-auth {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--gray-color);
+            transition: transform 0.3s ease;
+        }
+
+        .close-auth:hover {
+            transform: rotate(90deg);
+        }
+
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--dark-tertiary);
+            margin-bottom: 20px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+            color: var(--gray-color);
+        }
+
+        .auth-tab.active {
+            border-bottom: 2px solid var(--primary-color);
+            color: var(--light-color);
+        }
+
+        .auth-tab:hover {
+            color: var(--light-color);
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .auth-form input {
+            padding: 12px;
+            background-color: var(--dark-tertiary);
+            border: 1px solid var(--dark-tertiary);
+            border-radius: 8px;
+            font-size: 16px;
+            color: var(--light-color);
+            transition: all 0.3s ease;
+        }
+
+        .auth-form input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(6, 82, 221, 0.2);
+            outline: none;
+        }
+
+        .auth-form button {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .auth-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(6, 82, 221, 0.3);
+        }
+
+        /* Profile Modal */
+        .profile-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .profile-container {
+            background-color: var(--dark-secondary);
+            border-radius: 12px;
+            width: 500px;
+            max-width: 90%;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: scaleUp 0.3s ease;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-header h2 {
+            color: var(--light-color);
+        }
+
+        .close-profile {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--gray-color);
+            transition: transform 0.3s ease;
+        }
+
+        .close-profile:hover {
+            transform: rotate(90deg);
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .profile-pic-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            margin: 0 auto 20px;
+        }
+
+        .profile-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .profile-field label {
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+
+        .profile-field input {
+            padding: 12px;
+            background-color: var(--dark-tertiary);
+            border: 1px solid var(--dark-tertiary);
+            border-radius: 8px;
+            font-size: 16px;
+            color: var(--light-color);
+            transition: all 0.3s ease;
+        }
+
+        .profile-field input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(6, 82, 221, 0.2);
+            outline: none;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .profile-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .save-profile {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .save-profile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(6, 82, 221, 0.3);
+        }
+
+        .logout-btn {
+            background-color: var(--dark-tertiary);
+            color: var(--light-color);
+        }
+
+        .logout-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Search Results */
+        .search-results {
+            margin-top: 20px;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-color);
+        }
+
+        .no-results i {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        /* First Time Indicator */
+        .first-time-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            z-index: 1001;
+            text-align: center;
+            max-width: 300px;
+            display: none;
+        }
+
+        .first-time-indicator h3 {
+            margin-bottom: 10px;
+        }
+
+        .first-time-indicator p {
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .got-it-btn {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Footer Styles */
+        footer {
+            background-color: var(--dark-secondary);
+            padding: 40px 20px;
+            margin-top: 40px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .footer-section h3 {
+            color: var(--light-color);
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+
+        .footer-links a {
+            color: var(--gray-color);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 30px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid var(--dark-tertiary);
+            text-align: center;
+            color: var(--gray-color);
+            font-size: 14px;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .search-bar {
+                margin: 0 16px;
+            }
+            
+            .user-actions {
+                gap: 8px;
+            }
+            
+            .user-actions button {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            
+            .video-player {
+                width: 95%;
+            }
+            
+            .notification-panel {
+                width: 90%;
+                right: 5%;
+            }
+            
+            .videos-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .shorts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 769px) {
+            .video-detail-container {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .video-player-container {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-mosque"></i>
+            <h1>IslamicTube</h1>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search Islamic content...">
+            <button id="searchBtn"><i class="fas fa-search"></i></button>
+        </div>
+        <div class="user-actions">
+            <div class="notification-bell" id="notificationBell">
+                <i class="fas fa-bell"></i>
+                <span class="notification-count" id="notificationCount">0</span>
+            </div>
+            <div id="userProfileSection" style="display: none;">
+                <div class="user-profile" id="userProfile">
+                    <div class="profile-pic" id="profilePic">U</div>
+                    <span id="userName">User</span>
+                </div>
+            </div>
+            <button class="sign-in-btn" id="signInBtn">Sign In</button>
+        </div>
+    </header>
+
+    <!-- Notification Panel -->
+    <div class="notification-panel" id="notificationPanel">
+        <h3>
+            Notifications
+            <button class="close-notifications" id="closeNotifications">
+                <i class="fas fa-times"></i>
+            </button>
+        </h3>
+        <div class="notification-list" id="notificationList">
+            <!-- Notifications will be dynamically added here -->
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="content">
+            <!-- Home Page -->
+            <div id="homePage" class="page-content active">
+                <!-- Categories -->
+                <div class="categories">
+                    <button class="category-btn active" data-category="all">All</button>
+                    <button class="category-btn" data-category="waz">Waz</button>
+                    <button class="category-btn" data-category="gojol">Gojol</button>
+                    <button class="category-btn" data-category="tilawat">Tilawat</button>
+                    <button class="category-btn" data-category="story">Islamic Story</button>
+                    <button class="category-btn" data-category="cartoon">Islamic Cartoon</button>
+                </div>
+
+                <!-- Videos Grid -->
+                <div class="videos-grid" id="videosGrid">
+                    <!-- Video cards will be dynamically generated here -->
+                </div>
+
+                <!-- Search Results -->
+                <div class="search-results" id="searchResults" style="display: none;">
+                    <!-- Search results will be displayed here -->
+                </div>
+            </div>
+
+            <!-- Shorts Page -->
+            <div id="shortsPage" class="page-content">
+                <h2 style="margin-bottom: 20px;">Islamic Shorts</h2>
+                <div class="shorts-grid" id="shortsGrid">
+                    <!-- Short cards will be dynamically generated here -->
+                </div>
+            </div>
+
+            <!-- Downloads Page -->
+            <div id="downloadsPage" class="page-content">
+                <div class="downloads-container">
+                    <h2 style="margin-bottom: 20px;">Your Downloads</h2>
+                    <div class="downloads-list" id="downloadsList">
+                        <!-- Download items will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Saved Page -->
+            <div id="savedPage" class="page-content">
+                <div class="downloads-container">
+                    <h2 style="margin-bottom: 20px;">Your Saved Videos</h2>
+                    <div class="downloads-list" id="savedList">
+                        <!-- Saved items will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+        <div class="nav-item active" data-page="home">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </div>
+        <div class="nav-item" data-page="shorts">
+            <i class="fas fa-play-circle"></i>
+            <span>Shorts</span>
+        </div>
+        <div class="nav-item" data-page="saved">
+            <i class="fas fa-bookmark"></i>
+            <span>Saved</span>
+        </div>
+        <div class="nav-item" data-page="profile">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </div>
+    </div>
+
+    <!-- Video Player (Desktop) -->
+    <div class="video-player-container" id="videoPlayer">
+        <div class="video-player">
+            <div class="player-header">
+                <h2 id="playerTitle">Video Title</h2>
+                <button class="close-player" id="closePlayer">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="video-iframe">
+                <iframe id="videoFrame" src="" frameborder="0" allowfullscreen></iframe>
+            </div>
+            <div class="player-controls">
+                <div>
+                    <button id="likeBtn"><i class="far fa-thumbs-up"></i> <span id="likeCount">0</span></button>
+                    <button id="shareBtn"><i class="fas fa-share"></i> Share</button>
+                    <button id="saveBtn"><i class="far fa-bookmark"></i> Save</button>
+                </div>
+                <button class="fullscreen-btn" id="fullscreenBtn">
+                    <i class="fas fa-expand"></i> Fullscreen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shorts Player -->
+    <div class="shorts-player-container" id="shortsPlayer">
+        <div class="shorts-player-header">
+            <h2>Islamic Shorts</h2>
+            <button class="close-shorts" id="closeShorts">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="shorts-player">
+            <iframe class="short-video-iframe" id="shortVideoFrame" src="" frameborder="0" allowfullscreen></iframe>
+            <div class="shorts-controls">
+                <button class="short-control-btn" id="shortLikeBtn">
+                    <i class="far fa-heart"></i>
+                    <span id="shortLikesCount">0</span>
+                </button>
+                <button class="short-control-btn" id="shortCommentBtn">
+                    <i class="far fa-comment"></i>
+                    <span>Comment</span>
+                </button>
+                <button class="short-control-btn" id="shortShareBtn">
+                    <i class="fas fa-share"></i>
+                    <span>Share</span>
+                </button>
+                <button class="short-control-btn" id="shortSaveBtn">
+                    <i class="far fa-bookmark"></i>
+                    <span>Save</span>
+                </button>
+            </div>
+            <div class="shorts-navigation">
+                <div class="shorts-nav-left" id="prevShort">
+                    <div class="nav-icon">
+                        <i class="fas fa-chevron-up"></i>
+                    </div>
+                </div>
+                <div class="shorts-nav-right" id="nextShort">
+                    <div class="nav-icon">
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Detail View (Mobile) -->
+    <div class="video-detail-container" id="videoDetailContainer">
+        <div class="video-detail-header">
+            <h2 id="detailTitle">Video Title</h2>
+            <button class="close-detail" id="closeDetail">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="video-detail-player">
+            <iframe id="detailFrame" src="" frameborder="0" allowfullscreen></iframe>
+        </div>
+        <div class="video-detail-info">
+            <div class="video-detail-title" id="detailVideoTitle">Beautiful Quran Recitation by Sheikh Mishary Rashid</div>
+            <div class="video-detail-meta">
+                <div class="video-detail-views" id="detailViews">1.2M views</div>
+                <div class="video-detail-actions">
+                    <button class="video-action-btn" id="detailLikeBtn">
+                        <i class="far fa-thumbs-up"></i>
+                        <span id="detailLikeCount">11K</span>
+                    </button>
+                    <button class="video-action-btn" id="detailShareBtn">
+                        <i class="fas fa-share"></i>
+                        <span>Share</span>
+                    </button>
+                    <button class="video-action-btn" id="detailSaveBtn">
+                        <i class="far fa-bookmark"></i>
+                        <span>Save</span>
+                    </button>
+                </div>
+            </div>
+            <div class="channel-info">
+                <div class="channel-detail-icon" id="detailChannelIcon">Q</div>
+                <div class="channel-detail-info">
+                    <div class="channel-detail-name" id="detailChannelName">Quran Recitations</div>
+                    <div class="channel-detail-subs" id="detailChannelSubs">193K subscribers</div>
+                </div>
+                <button class="subscribe-btn">SUBSCRIBE</button>
+            </div>
+            <div class="video-description">
+                <div class="description-text" id="detailDescription">Beautiful recitation of Surah Al-Fatiha and Surah Al-Baqarah by Sheikh Mishary Rashid Alafasy.</div>
+            </div>
+            <div class="related-videos">
+                <h3>Up next</h3>
+                <div id="relatedVideosList">
+                    <!-- Related videos will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- First Time Indicator -->
+    <div class="first-time-indicator" id="firstTimeIndicator">
+        <h3>Welcome to Shorts!</h3>
+        <p>Swipe up or down to navigate between shorts. Double tap to like.</p>
+        <button class="got-it-btn" id="gotItBtn">Got it!</button>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div class="auth-modal" id="authModal">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h2>Sign In</h2>
+                <button class="close-auth" id="closeAuth">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" data-auth="signin">Sign In</div>
+                <div class="auth-tab" data-auth="signup">Sign Up</div>
+            </div>
+            
+            <div class="auth-form" id="signinForm">
+                <input type="email" id="signinEmail" placeholder="Email">
+                <input type="password" id="signinPassword" placeholder="Password">
+                <button id="signinSubmit">Sign In</button>
+            </div>
+            
+            <div class="auth-form" id="signupForm" style="display: none;">
+                <input type="text" id="signupName" placeholder="Full Name">
+                <input type="email" id="signupEmail" placeholder="Email">
+                <input type="password" id="signupPassword" placeholder="Password">
+                <input type="password" id="signupConfirmPassword" placeholder="Confirm Password">
+                <button id="signupSubmit">Sign Up</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="profile-modal" id="profileModal">
+        <div class="profile-container">
+            <div class="profile-header">
+                <h2>Profile Settings</h2>
+                <button class="close-profile" id="closeProfile">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="profile-info">
+                <div class="profile-pic-large" id="profilePicLarge">U</div>
+                
+                <div class="profile-field">
+                    <label for="profileName">Full Name</label>
+                    <input type="text" id="profileName" placeholder="Enter your name">
+                </div>
+                
+                <div class="profile-field">
+                    <label for="profileEmail">Email</label>
+                    <input type="email" id="profileEmail" placeholder="Enter your email">
+                </div>
+                
+                <div class="profile-field">
+                    <label for="profileBio">Bio</label>
+                    <input type="text" id="profileBio" placeholder="Tell us about yourself">
+                </div>
+
+                <div class="profile-field">
+                    <h3>Recently Watched</h3>
+                    <div id="recentlyWatchedList">
+                        <!-- Recently watched videos will be added here -->
+                    </div>
+                </div>
+                
+                <div class="profile-actions">
+                    <button class="save-profile" id="saveProfile">Save Changes</button>
+                    <button class="logout-btn" id="logoutBtn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>IslamicTube</h3>
+                <p>Your premier destination for Islamic content, including lectures, recitations, stories, and more.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">Shorts</a></li>
+                    <li><a href="#">Saved Videos</a></li>
+                    <li><a href="#">Profile</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Legal</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Cookie Policy</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <ul class="footer-links">
+                    <li><a href="mailto:support@islamictube.com">support@islamictube.com</a></li>
+                    <li><a href="#">Feedback</a></li>
+                    <li><a href="#">Report Issue</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2023 IslamicTube. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAeNDFuCF8nMJchSFNodP2Ir0Wc4xBDd70",
+            authDomain: "islamictube-986f8.firebaseapp.com",
+            projectId: "islamictube-986f8",
+            storageBucket: "islamictube-986f8.firebasestorage.app",
+            messagingSenderId: "1073474585956",
+            appId: "1:1073474585956:web:9b2b5c2e5cee4534c4e671",
+            measurementId: "G-NSQGV9Y3G6"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+        const analytics = firebase.analytics();
+
+        // DOM Elements
+        const pages = document.querySelectorAll('.page-content');
+        const navItems = document.querySelectorAll('.nav-item');
+        const videosGrid = document.getElementById('videosGrid');
+        const shortsGrid = document.getElementById('shortsGrid');
+        const downloadsList = document.getElementById('downloadsList');
+        const savedList = document.getElementById('savedList');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const searchResults = document.getElementById('searchResults');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const videoFrame = document.getElementById('videoFrame');
+        const playerTitle = document.getElementById('playerTitle');
+        const closePlayer = document.getElementById('closePlayer');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const likeBtn = document.getElementById('likeBtn');
+        const likeCount = document.getElementById('likeCount');
+        const saveBtn = document.getElementById('saveBtn');
+        const shortsPlayer = document.getElementById('shortsPlayer');
+        const shortVideoFrame = document.getElementById('shortVideoFrame');
+        const closeShorts = document.getElementById('closeShorts');
+        const prevShort = document.getElementById('prevShort');
+        const nextShort = document.getElementById('nextShort');
+        const shortLikeBtn = document.getElementById('shortLikeBtn');
+        const shortLikesCount = document.getElementById('shortLikesCount');
+        const shortSaveBtn = document.getElementById('shortSaveBtn');
+        const videoDetailContainer = document.getElementById('videoDetailContainer');
+        const detailFrame = document.getElementById('detailFrame');
+        const detailTitle = document.getElementById('detailTitle');
+        const detailVideoTitle = document.getElementById('detailVideoTitle');
+        const detailViews = document.getElementById('detailViews');
+        const detailDescription = document.getElementById('detailDescription');
+        const detailChannelIcon = document.getElementById('detailChannelIcon');
+        const detailChannelName = document.getElementById('detailChannelName');
+        const detailChannelSubs = document.getElementById('detailChannelSubs');
+        const detailLikeBtn = document.getElementById('detailLikeBtn');
+        const detailLikeCount = document.getElementById('detailLikeCount');
+        const detailSaveBtn = document.getElementById('detailSaveBtn');
+        const closeDetail = document.getElementById('closeDetail');
+        const relatedVideosList = document.getElementById('relatedVideosList');
+        const firstTimeIndicator = document.getElementById('firstTimeIndicator');
+        const gotItBtn = document.getElementById('gotItBtn');
+        const notificationBell = document.getElementById('notificationBell');
+        const notificationPanel = document.getElementById('notificationPanel');
+        const notificationCount = document.getElementById('notificationCount');
+        const notificationList = document.getElementById('notificationList');
+        const closeNotifications = document.getElementById('closeNotifications');
+        const authModal = document.getElementById('authModal');
+        const signInBtn = document.getElementById('signInBtn');
+        const closeAuth = document.getElementById('closeAuth');
+        const authTabs = document.querySelectorAll('.auth-tab');
+        const signinForm = document.getElementById('signinForm');
+        const signupForm = document.getElementById('signupForm');
+        const signinSubmit = document.getElementById('signinSubmit');
+        const signupSubmit = document.getElementById('signupSubmit');
+        const userProfileSection = document.getElementById('userProfileSection');
+        const userProfile = document.getElementById('userProfile');
+        const profilePic = document.getElementById('profilePic');
+        const userName = document.getElementById('userName');
+        const profileModal = document.getElementById('profileModal');
+        const closeProfile = document.getElementById('closeProfile');
+        const saveProfile = document.getElementById('saveProfile');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const profilePicLarge = document.getElementById('profilePicLarge');
+        const profileName = document.getElementById('profileName');
+        const profileEmail = document.getElementById('profileEmail');
+        const profileBio = document.getElementById('profileBio');
+        const recentlyWatchedList = document.getElementById('recentlyWatchedList');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+
+        // App State
+        let currentUser = null;
+        let userData = null;
+        let videos = [];
+        let shorts = [];
+        let savedVideos = [];
+        let recentlyWatched = [];
+        let notifications = [];
+        let currentShortIndex = 0;
+        let currentVideo = null;
+        let isFirstTimeShorts = true;
+
+        // Initialize the app
+        function init() {
+            loadVideosFromFirebase();
+            loadShortsFromFirebase();
+            setupEventListeners();
+            checkAuthState();
+            checkFirstTimeShorts();
+        }
+
+        // Load videos from Firebase
+        function loadVideosFromFirebase() {
+            db.collection('videos').orderBy('createdAt', 'desc').get()
+                .then(snapshot => {
+                    videos = [];
+                    snapshot.forEach(doc => {
+                        const video = doc.data();
+                        video.id = doc.id;
+                        videos.push(video);
+                    });
+                    renderVideos();
+                })
+                .catch(error => {
+                    console.error('Error loading videos:', error);
+                    // Load sample data if Firebase fails
+                    loadSampleData();
+                });
+        }
+
+        // Load shorts from Firebase
+        function loadShortsFromFirebase() {
+            db.collection('shorts').orderBy('createdAt', 'desc').get()
+                .then(snapshot => {
+                    shorts = [];
+                    snapshot.forEach(doc => {
+                        const short = doc.data();
+                        short.id = doc.id;
+                        shorts.push(short);
+                    });
+                    renderShorts();
+                })
+                .catch(error => {
+                    console.error('Error loading shorts:', error);
+                });
+        }
+
+        // Load sample data (fallback if Firebase fails)
+        function loadSampleData() {
+            // Sample videos
+            videos = [
+                {
+                    id: 1,
+                    title: "Beautiful Quran Recitation by Sheikh Mishary Rashid",
+                    channel: "Quran Recitations",
+                    views: "1.2M",
+                    date: "2 weeks ago",
+                    duration: "15:42",
+                    thumbnail: "https://i.ytimg.com/vi/9t-MH4s0-8o/hqdefault.jpg",
+                    videoId: "9t-MH4s0-8o",
+                    category: "tilawat",
+                    description: "Beautiful recitation of Surah Al-Fatiha and Surah Al-Baqarah by Sheikh Mishary Rashid Alafasy.",
+                    likes: 11200,
+                    comments: 245
+                },
+                {
+                    id: 2,
+                    title: "Islamic Story of Prophet Muhammad (PBUH)",
+                    channel: "Islamic Stories",
+                    views: "850K",
+                    date: "1 month ago",
+                    duration: "22:15",
+                    thumbnail: "https://i.ytimg.com/vi/7f6SdW0c4eE/hqdefault.jpg",
+                    videoId: "7f6SdW0c4eE",
+                    category: "story",
+                    description: "The inspiring story of Prophet Muhammad (PBUH) and his journey to spread Islam.",
+                    likes: 8500,
+                    comments: 189
+                },
+                {
+                    id: 3,
+                    title: "Nasheed: Tala'al Badru Alayna",
+                    channel: "Islamic Music",
+                    views: "3.5M",
+                    date: "6 months ago",
+                    duration: "4:32",
+                    thumbnail: "https://i.ytimg.com/vi/3tR6bmnYv_s/hqdefault.jpg",
+                    videoId: "3tR6bmnYv_s",
+                    category: "gojol",
+                    description: "Beautiful nasheed celebrating the arrival of Prophet Muhammad (PBUH) to Medina.",
+                    likes: 24500,
+                    comments: 567
+                },
+                {
+                    id: 4,
+                    title: "Friday Sermon: Importance of Patience in Islam",
+                    channel: "Islamic Lectures",
+                    views: "450K",
+                    date: "3 days ago",
+                    duration: "35:18",
+                    thumbnail: "https://i.ytimg.com/vi/5M3Y8-yJNwY/hqdefault.jpg",
+                    videoId: "5M3Y8-yJNwY",
+                    category: "waz",
+                    description: "Friday sermon discussing the importance of patience and perseverance in Islam.",
+                    likes: 3200,
+                    comments: 78
+                },
+                {
+                    id: 5,
+                    title: "Islamic Cartoon: The Story of Ibrahim (AS)",
+                    channel: "Kids Islamic Stories",
+                    views: "2.1M",
+                    date: "8 months ago",
+                    duration: "12:45",
+                    thumbnail: "https://i.ytimg.com/vi/8pYmlC2-7_c/hqdefault.jpg",
+                    videoId: "8pYmlC2-7_c",
+                    category: "cartoon",
+                    description: "Animated story of Prophet Ibrahim (AS) for children to learn about Islamic history.",
+                    likes: 15600,
+                    comments: 423
+                },
+                {
+                    id: 6,
+                    title: "Quran Tafsir: Understanding Surah Yasin",
+                    channel: "Quran Studies",
+                    views: "680K",
+                    date: "2 months ago",
+                    duration: "48:22",
+                    thumbnail: "https://i.ytimg.com/vi/6iF53T0T53k/hqdefault.jpg",
+                    videoId: "6iF53T0T53k",
+                    category: "waz",
+                    description: "Detailed explanation and interpretation of Surah Yasin by renowned scholar.",
+                    likes: 5200,
+                    comments: 134
+                }
+            ];
+
+            // Sample shorts
+            shorts = [
+                {
+                    id: 1,
+                    title: "Short Quran Recitation",
+                    channel: "Quran Shorts",
+                    views: "25K",
+                    thumbnail: "https://i.ytimg.com/vi/9t-MH4s0-8o/sddefault.jpg",
+                    videoId: "9t-MH4s0-8o",
+                    category: "tilawat",
+                    description: "Beautiful short Quran recitation",
+                    likes: 1500,
+                    comments: 45
+                },
+                {
+                    id: 2,
+                    title: "Islamic Wisdom in 60 Seconds",
+                    channel: "Islamic Wisdom",
+                    views: "18K",
+                    thumbnail: "https://i.ytimg.com/vi/5M3Y8-yJNwY/sddefault.jpg",
+                    videoId: "5M3Y8-yJNwY",
+                    category: "waz",
+                    description: "Quick Islamic wisdom for daily life",
+                    likes: 1200,
+                    comments: 32
+                },
+                {
+                    id: 3,
+                    title: "Nasheed Short - Tala'al Badru",
+                    channel: "Islamic Music",
+                    views: "32K",
+                    thumbnail: "https://i.ytimg.com/vi/3tR6bmnYv_s/sddefault.jpg",
+                    videoId: "3tR6bmnYv_s",
+                    category: "gojol",
+                    description: "Beautiful nasheed in short format",
+                    likes: 2100,
+                    comments: 67
+                },
+                {
+                    id: 4,
+                    title: "Prophet Story Short",
+                    channel: "Islamic Stories",
+                    views: "15K",
+                    thumbnail: "https://i.ytimg.com/vi/7f6SdW0c4eE/sddefault.jpg",
+                    videoId: "7f6SdW0c4eE",
+                    category: "story",
+                    description: "Short story from Prophet's life",
+                    likes: 980,
+                    comments: 23
+                }
+            ];
+
+            renderVideos();
+            renderShorts();
+        }
+
+        // Render videos to the grid
+        function renderVideos(videosToRender = videos) {
+            videosGrid.innerHTML = '';
+            
+            if (videosToRender.length === 0) {
+                videosGrid.innerHTML = `
+                    <div class="no-results">
+                        <i class="far fa-frown"></i>
+                        <h3>No videos found</h3>
+                        <p>Try searching for something else</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            videosToRender.forEach(video => {
+                const videoCard = document.createElement('div');
+                videoCard.className = 'video-card';
+                videoCard.setAttribute('data-id', video.id);
+                
+                // Get channel initial for icon
+                const channelInitial = video.channel ? video.channel.charAt(0) : 'I';
+                
+                videoCard.innerHTML = `
+                    <div class="thumbnail">
+                        <img src="${video.thumbnail}" alt="${video.title}" onerror="this.src='https://via.placeholder.com/300x169?text=IslamicTube'">
+                        <div class="duration">${video.duration || '10:00'}</div>
+                    </div>
+                    <div class="video-info">
+                        <div class="channel-icon">${channelInitial}</div>
+                        <div class="video-details">
+                            <div class="video-title">${video.title}</div>
+                            <div class="channel-name">${video.channel || 'Islamic Channel'}</div>
+                            <div class="video-meta">${video.views || '0'} views • ${video.date || 'Recently'}</div>
+                        </div>
+                    </div>
+                `;
+                
+                videosGrid.appendChild(videoCard);
+            });
+        }
+
+        // Render shorts to the grid
+        function renderShorts(shortsToRender = shorts) {
+            shortsGrid.innerHTML = '';
+            
+            if (shortsToRender.length === 0) {
+                shortsGrid.innerHTML = `
+                    <div class="no-results">
+                        <i class="far fa-frown"></i>
+                        <h3>No shorts found</h3>
+                        <p>Check back later for new shorts</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            shortsToRender.forEach(short => {
+                const shortCard = document.createElement('div');
+                shortCard.className = 'short-card';
+                shortCard.setAttribute('data-id', short.id);
+                
+                shortCard.innerHTML = `
+                    <div class="short-thumbnail">
+                        <img src="${short.thumbnail}" alt="${short.title}" onerror="this.src='https://via.placeholder.com/180x320?text=IslamicTube'">
+                    </div>
+                    <div class="short-info">
+                        <div class="short-title">${short.title}</div>
+                        <div class="short-views">${short.views || '0'} views</div>
+                    </div>
+                `;
+                
+                shortsGrid.appendChild(shortCard);
+            });
+        }
+
+        // Render saved videos
+        function renderSavedVideos() {
+            savedList.innerHTML = '';
+            
+            if (savedVideos.length === 0) {
+                savedList.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-bookmark"></i>
+                        <h3>No saved videos yet</h3>
+                        <p>Save videos to watch them later</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            savedVideos.forEach(video => {
+                const savedItem = document.createElement('div');
+                savedItem.className = 'download-item';
+                
+                savedItem.innerHTML = `
+                    <div class="download-thumbnail">
+                        <img src="${video.thumbnail}" alt="${video.title}" onerror="this.src='https://via.placeholder.com/300x169?text=IslamicTube'">
+                    </div>
+                    <div class="download-info">
+                        <div class="download-title">${video.title}</div>
+                        <div class="download-meta">${video.channel || 'Islamic Channel'} • ${video.duration || '10:00'}</div>
+                        <div class="download-actions">
+                            <button class="download-action-btn play-saved-btn" data-id="${video.id}">
+                                <i class="fas fa-play"></i> Play
+                            </button>
+                            <button class="download-action-btn remove-saved-btn" data-id="${video.id}">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                savedList.appendChild(savedItem);
+            });
+
+            // Add event listeners to saved video buttons
+            document.querySelectorAll('.play-saved-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const videoId = this.getAttribute('data-id');
+                    const video = savedVideos.find(v => v.id == videoId);
+                    if (video) {
+                        playVideo(video);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.remove-saved-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const videoId = this.getAttribute('data-id');
+                    removeSavedVideo(videoId);
+                });
+            });
+        }
+
+        // Render recently watched videos
+        function renderRecentlyWatched() {
+            recentlyWatchedList.innerHTML = '';
+            
+            if (recentlyWatched.length === 0) {
+                recentlyWatchedList.innerHTML = `
+                    <div class="no-results">
+                        <p>No recently watched videos</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            recentlyWatched.forEach(video => {
+                const recentItem = document.createElement('div');
+                recentItem.className = 'related-video-item';
+                recentItem.setAttribute('data-id', video.id);
+                
+                recentItem.innerHTML = `
+                    <div class="related-thumbnail">
+                        <img src="${video.thumbnail}" alt="${video.title}" onerror="this.src='https://via.placeholder.com/120x68?text=IslamicTube'">
+                        <div class="related-duration">${video.duration || '10:00'}</div>
+                    </div>
+                    <div class="related-info">
+                        <div class="related-title">${video.title}</div>
+                        <div class="related-channel">${video.channel || 'Islamic Channel'}</div>
+                        <div class="related-meta">${video.views || '0'} views</div>
+                    </div>
+                `;
+                
+                recentlyWatchedList.appendChild(recentItem);
+            });
+
+            // Add click event to recently watched videos
+            document.querySelectorAll('#recentlyWatchedList .related-video-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const videoId = this.getAttribute('data-id');
+                    const video = recentlyWatched.find(v => v.id == videoId);
+                    if (video) {
+                        playVideo(video);
+                    }
+                });
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Navigation
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const page = this.getAttribute('data-page');
+                    
+                    // Update active nav item
+                    navItems.forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding page
+                    pages.forEach(p => p.classList.remove('active'));
+                    document.getElementById(page + 'Page').classList.add('active');
+                    
+                    // Handle profile page separately
+                    if (page === 'profile') {
+                        if (currentUser) {
+                            profileModal.style.display = 'flex';
+                            loadProfileData();
+                        } else {
+                            authModal.style.display = 'flex';
+                        }
+                    } else if (page === 'saved') {
+                        if (currentUser) {
+                            loadSavedVideos();
+                        } else {
+                            authModal.style.display = 'flex';
+                            // Reset navigation to home
+                            navItems.forEach(i => i.classList.remove('active'));
+                            document.querySelector('.nav-item[data-page="home"]').classList.add('active');
+                            pages.forEach(p => p.classList.remove('active'));
+                            document.getElementById('homePage').classList.add('active');
+                        }
+                    }
+                });
+            });
+
+            // Video card click
+            document.addEventListener('click', function(e) {
+                const videoCard = e.target.closest('.video-card');
+                if (videoCard) {
+                    const videoId = videoCard.getAttribute('data-id');
+                    const video = videos.find(v => v.id == videoId);
+                    if (video) {
+                        playVideo(video);
+                    }
+                }
+            });
+
+            // Short card click
+            document.addEventListener('click', function(e) {
+                const shortCard = e.target.closest('.short-card');
+                if (shortCard) {
+                    const shortId = shortCard.getAttribute('data-id');
+                    const shortIndex = shorts.findIndex(s => s.id == shortId);
+                    if (shortIndex !== -1) {
+                        currentShortIndex = shortIndex;
+                        playShort(currentShortIndex);
+                    }
+                }
+            });
+
+            // Search functionality
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+
+            // Close video player (desktop)
+            closePlayer.addEventListener('click', function() {
+                videoPlayer.style.display = 'none';
+                videoFrame.src = '';
+            });
+
+            // Close shorts player
+            closeShorts.addEventListener('click', function() {
+                shortsPlayer.style.display = 'none';
+                shortVideoFrame.src = '';
+            });
+
+            // Shorts navigation
+            prevShort.addEventListener('click', function() {
+                navigateShorts(-1);
+            });
+
+            nextShort.addEventListener('click', function() {
+                navigateShorts(1);
+            });
+
+            // Shorts double tap for like
+            let lastTap = 0;
+            shortsPlayer.addEventListener('touchend', function(e) {
+                const currentTime = new Date().getTime();
+                const tapLength = currentTime - lastTap;
+                if (tapLength < 500 && tapLength > 0) {
+                    // Double tap detected
+                    handleShortDoubleTap();
+                }
+                lastTap = currentTime;
+            });
+
+            // Shorts keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (shortsPlayer.style.display === 'flex') {
+                    if (e.key === 'ArrowUp') {
+                        navigateShorts(-1);
+                    } else if (e.key === 'ArrowDown') {
+                        navigateShorts(1);
+                    }
+                }
+            });
+
+            // Short like button
+            shortLikeBtn.addEventListener('click', function() {
+                likeShort(currentShortIndex);
+            });
+
+            // Short save button
+            shortSaveBtn.addEventListener('click', function() {
+                if (currentShortIndex >= 0 && currentShortIndex < shorts.length) {
+                    saveVideo(shorts[currentShortIndex]);
+                }
+            });
+
+            // Close video detail (mobile)
+            closeDetail.addEventListener('click', function() {
+                videoDetailContainer.style.display = 'none';
+                detailFrame.src = '';
+            });
+
+            // First time indicator
+            gotItBtn.addEventListener('click', function() {
+                firstTimeIndicator.style.display = 'none';
+                localStorage.setItem('islamictube_shorts_seen', 'true');
+            });
+
+            // Fullscreen button
+            fullscreenBtn.addEventListener('click', function() {
+                if (videoFrame.requestFullscreen) {
+                    videoFrame.requestFullscreen();
+                } else if (videoFrame.mozRequestFullScreen) {
+                    videoFrame.mozRequestFullScreen();
+                } else if (videoFrame.webkitRequestFullscreen) {
+                    videoFrame.webkitRequestfullscreen();
+                } else if (videoFrame.msRequestFullscreen) {
+                    videoFrame.msRequestFullscreen();
+                }
+            });
+
+            // Like button
+            likeBtn.addEventListener('click', function() {
+                if (currentVideo) {
+                    likeVideo(currentVideo);
+                }
+            });
+
+            // Save button
+            saveBtn.addEventListener('click', function() {
+                if (currentVideo) {
+                    saveVideo(currentVideo);
+                }
+            });
+
+            // Detail like button
+            detailLikeBtn.addEventListener('click', function() {
+                if (currentVideo) {
+                    likeVideo(currentVideo);
+                }
+            });
+
+            // Detail save button
+            detailSaveBtn.addEventListener('click', function() {
+                if (currentVideo) {
+                    saveVideo(currentVideo);
+                }
+            });
+
+            // Notification bell
+            notificationBell.addEventListener('click', function() {
+                notificationPanel.style.display = notificationPanel.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close notifications
+            closeNotifications.addEventListener('click', function() {
+                notificationPanel.style.display = 'none';
+            });
+
+            // Authentication modal
+            signInBtn.addEventListener('click', function() {
+                authModal.style.display = 'flex';
+            });
+
+            // Close authentication modal
+            closeAuth.addEventListener('click', function() {
+                authModal.style.display = 'none';
+            });
+
+            // Authentication tabs
+            authTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const authType = this.getAttribute('data-auth');
+                    
+                    // Update active tab
+                    authTabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show corresponding form
+                    signinForm.style.display = authType === 'signin' ? 'flex' : 'none';
+                    signupForm.style.display = authType === 'signup' ? 'flex' : 'none';
+                });
+            });
+
+            // Sign in
+            signinSubmit.addEventListener('click', function() {
+                const email = document.getElementById('signinEmail').value;
+                const password = document.getElementById('signinPassword').value;
+                
+                if (email && password) {
+                    signIn(email, password);
+                } else {
+                    alert('Please fill in all fields');
+                }
+            });
+
+            // Sign up
+            signupSubmit.addEventListener('click', function() {
+                const name = document.getElementById('signupName').value;
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                const confirmPassword = document.getElementById('signupConfirmPassword').value;
+                
+                if (name && email && password && confirmPassword) {
+                    if (password === confirmPassword) {
+                        signUp(name, email, password);
+                    } else {
+                        alert('Passwords do not match');
+                    }
+                } else {
+                    alert('Please fill in all fields');
+                }
+            });
+
+            // User profile
+            userProfile.addEventListener('click', function() {
+                profileModal.style.display = 'flex';
+                loadProfileData();
+            });
+
+            // Close profile modal
+            closeProfile.addEventListener('click', function() {
+                profileModal.style.display = 'none';
+            });
+
+            // Save profile
+            saveProfile.addEventListener('click', function() {
+                saveProfileData();
+            });
+
+            // Logout
+            logoutBtn.addEventListener('click', function() {
+                signOut();
+            });
+
+            // Category filter
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active category
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const category = this.getAttribute('data-category');
+                    if (category === 'all') {
+                        renderVideos(videos);
+                    } else {
+                        const filteredVideos = videos.filter(video => 
+                            video.category === category
+                        );
+                        renderVideos(filteredVideos);
+                    }
+                });
+            });
+        }
+
+        // Perform search
+        function performSearch() {
+            const query = searchInput.value.trim().toLowerCase();
+            
+            if (query === '') {
+                searchResults.style.display = 'none';
+                videosGrid.style.display = 'grid';
+                return;
+            }
+            
+            const filteredVideos = videos.filter(video => 
+                video.title.toLowerCase().includes(query) || 
+                (video.description && video.description.toLowerCase().includes(query)) ||
+                (video.channel && video.channel.toLowerCase().includes(query))
+            );
+            
+            if (filteredVideos.length > 0) {
+                searchResults.innerHTML = `
+                    <h3>Search Results for "${query}"</h3>
+                    <div class="videos-grid" id="searchVideosGrid"></div>
+                `;
+                
+                const searchVideosGrid = document.getElementById('searchVideosGrid');
+                searchVideosGrid.innerHTML = '';
+                
+                filteredVideos.forEach(video => {
+                    const videoCard = document.createElement('div');
+                    videoCard.className = 'video-card';
+                    videoCard.setAttribute('data-id', video.id);
+                    
+                    const channelInitial = video.channel ? video.channel.charAt(0) : 'I';
+                    
+                    videoCard.innerHTML = `
+                        <div class="thumbnail">
+                            <img src="${video.thumbnail}" alt="${video.title}" onerror="this.src='https://via.placeholder.com/300x169?text=IslamicTube'">
+                            <div class="duration">${video.duration || '10:00'}</div>
+                        </div>
+                        <div class="video-info">
+                            <div class="channel-icon">${channelInitial}</div>
+                            <div class="video-details">
+                                <div class="video-title">${video.title}</div>
+                                <div class="channel-name">${video.channel || 'Islamic Channel'}</div>
+                                <div class="video-meta">${video.views || '0'} views • ${video.date || 'Recently'}</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    searchVideosGrid.appendChild(videoCard);
+                });
+                
+                videosGrid.style.display = 'none';
+                searchResults.style.display = 'block';
+            } else {
+                searchResults.innerHTML = `
+                    <div class="no-results">
+                        <i class="far fa-frown"></i>
+                        <h3>No results found for "${query}"</h3>
+                        <p>Try different keywords</p>
+                    </div>
+                `;
+                videosGrid.style.display = 'none';
+                searchResults.style.display = 'block';
+            }
+        }
+
+        // Play video in the appropriate player based on device
+        function playVideo(video) {
+            currentVideo = video;
+            
+            // Check if mobile device
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // Use mobile video detail view
+                playVideoMobile(video);
+            } else {
+                // Use desktop video player
+                playVideoDesktop(video);
+            }
+            
+            // Add to recently watched
+            addToRecentlyWatched(video);
+            
+            // Track view in analytics
+            trackVideoView(video.id);
+        }
+
+        // Play video in desktop player
+        function playVideoDesktop(video) {
+            playerTitle.textContent = video.title;
+            videoFrame.src = `https://www.youtube.com/embed/${video.videoId}?autoplay=1`;
+            likeCount.textContent = formatCount(video.likes || 0);
+            videoPlayer.style.display = 'flex';
+        }
+
+        // Play video in mobile detail view
+        function playVideoMobile(video) {
+            detailTitle.textContent = video.title;
+            detailVideoTitle.textContent = video.title;
+            detailViews.textContent = (video.views || '0') + ' views';
+            detailDescription.textContent = video.description || 'No description available';
+            detailChannelIcon.textContent = video.channel ? video.channel.charAt(0) : 'I';
+            detailChannelName.textContent = video.channel || 'Islamic Channel';
+            detailChannelSubs.textContent = '193K subscribers'; // This would come from the video data in a real app
+            detailLikeCount.textContent = formatCount(video.likes || 0);
+            
+            detailFrame.src = `https://www.youtube.com/embed/${video.videoId}?autoplay=1`;
+            videoDetailContainer.style.display = 'flex';
+            
+            // Render related videos
+            renderRelatedVideos(video);
+        }
+
+        // Render related videos
+        function renderRelatedVideos(currentVideo) {
+            relatedVideosList.innerHTML = '';
+            
+            // Get videos from same category (excluding current video)
+            const relatedVideos = videos
+                .filter(v => v.category === currentVideo.category && v.id !== currentVideo.id)
+                .slice(0, 3);
+            
+            if (relatedVideos.length === 0) {
+                relatedVideosList.innerHTML = `
+                    <div class="no-results">
+                        <p>No related videos found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            relatedVideos.forEach(video => {
+                const relatedVideoItem = document.createElement('div');
+                relatedVideoItem.className = 'related-video-item';
+                relatedVideoItem.setAttribute('data-id', video.id);
+                
+                relatedVideoItem.innerHTML = `
+                    <div class="related-thumbnail">
+                        <img src="${video.thumbnail}" alt="${video.title}" onerror="this.src='https://via.placeholder.com/120x68?text=IslamicTube'">
+                        <div class="related-duration">${video.duration || '10:00'}</div>
+                    </div>
+                    <div class="related-info">
+                        <div class="related-title">${video.title}</div>
+                        <div class="related-channel">${video.channel || 'Islamic Channel'}</div>
+                        <div class="related-meta">${video.views || '0'} views • ${video.date || 'Recently'}</div>
+                    </div>
+                `;
+                
+                relatedVideosList.appendChild(relatedVideoItem);
+            });
+            
+            // Add click event to related videos
+            document.querySelectorAll('.related-video-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const videoId = this.getAttribute('data-id');
+                    const video = videos.find(v => v.id == videoId);
+                    if (video) {
+                        playVideoMobile(video);
+                    }
+                });
+            });
+        }
+
+        // Play short
+        function playShort(index) {
+            if (index < 0 || index >= shorts.length) return;
+            
+            const short = shorts[index];
+            shortVideoFrame.src = `https://www.youtube.com/embed/${short.videoId}?autoplay=1`;
+            shortLikesCount.textContent = formatCount(short.likes || 0);
+            shortsPlayer.style.display = 'flex';
+            
+            // Track view in analytics
+            trackShortView(short.id);
+        }
+
+        // Navigate between shorts
+        function navigateShorts(direction) {
+            const newIndex = currentShortIndex + direction;
+            if (newIndex >= 0 && newIndex < shorts.length) {
+                currentShortIndex = newIndex;
+                playShort(currentShortIndex);
+            }
+        }
+
+        // Handle double tap on short
+        function handleShortDoubleTap() {
+            likeShort(currentShortIndex);
+            
+            // Show visual feedback
+            const heart = document.createElement('div');
+            heart.innerHTML = '<i class="fas fa-heart" style="font-size: 80px; color: white; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100;"></i>';
+            heart.style.position = 'absolute';
+            heart.style.top = '0';
+            heart.style.left = '0';
+            heart.style.width = '100%';
+            heart.style.height = '100%';
+            heart.style.pointerEvents = 'none';
+            shortsPlayer.querySelector('.shorts-player').appendChild(heart);
+            
+            setTimeout(() => {
+                heart.remove();
+            }, 1000);
+        }
+
+        // Like a short
+        function likeShort(index) {
+            if (index < 0 || index >= shorts.length) return;
+            
+            const short = shorts[index];
+            short.likes = (short.likes || 0) + 1;
+            shortLikesCount.textContent = formatCount(short.likes);
+            
+            // Update in Firebase
+            if (short.id) {
+                db.collection('shorts').doc(short.id).update({
+                    likes: short.likes
+                });
+            }
+            
+            // Track like in analytics
+            trackShortLike(short.id);
+        }
+
+        // Like a video
+        function likeVideo(video) {
+            video.likes = (video.likes || 0) + 1;
+            
+            // Update UI
+            likeCount.textContent = formatCount(video.likes);
+            detailLikeCount.textContent = formatCount(video.likes);
+            
+            // Update in Firebase
+            if (video.id) {
+                db.collection('videos').doc(video.id).update({
+                    likes: video.likes
+                });
+            }
+            
+            // Track like in analytics
+            trackVideoLike(video.id);
+        }
+
+        // Save a video
+        function saveVideo(video) {
+            if (!currentUser) {
+                alert('Please sign in to save videos');
+                authModal.style.display = 'flex';
+                return;
+            }
+            
+            // Check if video is already saved
+            if (savedVideos.some(v => v.id === video.id)) {
+                alert('This video is already saved');
+                return;
+            }
+            
+            // Add to saved videos
+            savedVideos.push(video);
+            
+            // Save to Firebase
+            db.collection('users').doc(currentUser.uid).collection('savedVideos').doc(video.id).set({
+                ...video,
+                savedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            // Update UI
+            alert('Video saved successfully!');
+            
+            // If we're on the saved page, refresh the list
+            if (document.getElementById('savedPage').classList.contains('active')) {
+                renderSavedVideos();
+            }
+        }
+
+        // Remove saved video
+        function removeSavedVideo(videoId) {
+            if (!currentUser) return;
+            
+            // Remove from saved videos
+            savedVideos = savedVideos.filter(v => v.id !== videoId);
+            
+            // Remove from Firebase
+            db.collection('users').doc(currentUser.uid).collection('savedVideos').doc(videoId).delete();
+            
+            // Update UI
+            renderSavedVideos();
+        }
+
+        // Load saved videos from Firebase
+        function loadSavedVideos() {
+            if (!currentUser) return;
+            
+            db.collection('users').doc(currentUser.uid).collection('savedVideos').get()
+                .then(snapshot => {
+                    savedVideos = [];
+                    snapshot.forEach(doc => {
+                        const video = doc.data();
+                        video.id = doc.id;
+                        savedVideos.push(video);
+                    });
+                    renderSavedVideos();
+                })
+                .catch(error => {
+                    console.error('Error loading saved videos:', error);
+                });
+        }
+
+        // Add video to recently watched
+        function addToRecentlyWatched(video) {
+            if (!currentUser) return;
+            
+            // Check if video is already in recently watched
+            const existingIndex = recentlyWatched.findIndex(v => v.id === video.id);
+            if (existingIndex !== -1) {
+                // Remove existing entry
+                recentlyWatched.splice(existingIndex, 1);
+            }
+            
+            // Add to beginning of array
+            recentlyWatched.unshift(video);
+            
+            // Keep only last 10 videos
+            if (recentlyWatched.length > 10) {
+                recentlyWatched = recentlyWatched.slice(0, 10);
+            }
+            
+            // Save to Firebase
+            db.collection('users').doc(currentUser.uid).update({
+                recentlyWatched: recentlyWatched
+            });
+            
+            // Update UI if profile modal is open
+            if (profileModal.style.display === 'flex') {
+                renderRecentlyWatched();
+            }
+        }
+
+        // Load recently watched from Firebase
+        function loadRecentlyWatched() {
+            if (!currentUser) return;
+            
+            db.collection('users').doc(currentUser.uid).get()
+                .then(doc => {
+                    if (doc.exists && doc.data().recentlyWatched) {
+                        recentlyWatched = doc.data().recentlyWatched;
+                        renderRecentlyWatched();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading recently watched:', error);
+                });
+        }
+
+        // Check if it's user's first time viewing shorts
+        function checkFirstTimeShorts() {
+            const hasSeenShorts = localStorage.getItem('islamictube_shorts_seen');
+            if (!hasSeenShorts) {
+                isFirstTimeShorts = true;
+            } else {
+                isFirstTimeShorts = false;
+            }
+        }
+
+        // Show first time indicator for shorts
+        function showFirstTimeIndicator() {
+            if (isFirstTimeShorts) {
+                firstTimeIndicator.style.display = 'block';
+            }
+        }
+
+        // Format count for display (e.g., 1000 -> 1K)
+        function formatCount(count) {
+            if (count >= 1000000) {
+                return (count / 1000000).toFixed(1) + 'M';
+            } else if (count >= 1000) {
+                return (count / 1000).toFixed(1) + 'K';
+            } else {
+                return count.toString();
+            }
+        }
+
+        // Track video view in analytics
+        function trackVideoView(videoId) {
+            // In a real app, this would send data to Firebase Analytics
+            console.log(`Tracked view for video: ${videoId}`);
+            
+            // Update view count in Firestore
+            if (currentUser) {
+                db.collection('video_views').add({
+                    userId: currentUser.uid,
+                    videoId: videoId,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        }
+
+        // Track short view in analytics
+        function trackShortView(shortId) {
+            // In a real app, this would send data to Firebase Analytics
+            console.log(`Tracked view for short: ${shortId}`);
+            
+            // Update view count in Firestore
+            if (currentUser) {
+                db.collection('short_views').add({
+                    userId: currentUser.uid,
+                    shortId: shortId,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        }
+
+        // Track short like in analytics
+        function trackShortLike(shortId) {
+            // In a real app, this would send data to Firebase Analytics
+            console.log(`Tracked like for short: ${shortId}`);
+            
+            // Update like count in Firestore
+            if (currentUser) {
+                db.collection('short_likes').add({
+                    userId: currentUser.uid,
+                    shortId: shortId,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        }
+
+        // Track video like in analytics
+        function trackVideoLike(videoId) {
+            // In a real app, this would send data to Firebase Analytics
+            console.log(`Tracked like for video: ${videoId}`);
+            
+            // Update like count in Firestore
+            if (currentUser) {
+                db.collection('video_likes').add({
+                    userId: currentUser.uid,
+                    videoId: videoId,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        }
+
+        // Check authentication state
+        function checkAuthState() {
+            auth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUser = user;
+                    loadUserData(user.uid);
+                    signInBtn.style.display = 'none';
+                    userProfileSection.style.display = 'flex';
+                } else {
+                    currentUser = null;
+                    userData = null;
+                    signInBtn.style.display = 'block';
+                    userProfileSection.style.display = 'none';
+                }
+            });
+        }
+
+        // Sign in with email and password
+        function signIn(email, password) {
+            auth.signInWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    authModal.style.display = 'none';
+                    alert('Successfully signed in!');
+                })
+                .catch(error => {
+                    alert('Error signing in: ' + error.message);
+                });
+        }
+
+        // Sign up with email and password
+        function signUp(name, email, password) {
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    // Save user data to Firestore
+                    return db.collection('users').doc(userCredential.user.uid).set({
+                        name: name,
+                        email: email,
+                        bio: '',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        recentlyWatched: []
+                    });
+                })
+                .then(() => {
+                    authModal.style.display = 'none';
+                    alert('Account created successfully!');
+                })
+                .catch(error => {
+                    alert('Error creating account: ' + error.message);
+                });
+        }
+
+        // Sign out
+        function signOut() {
+            auth.signOut()
+                .then(() => {
+                    profileModal.style.display = 'none';
+                    savedVideos = [];
+                    recentlyWatched = [];
+                    alert('Successfully signed out!');
+                })
+                .catch(error => {
+                    alert('Error signing out: ' + error.message);
+                });
+        }
+
+        // Load user data from Firestore
+        function loadUserData(uid) {
+            db.collection('users').doc(uid).get()
+                .then(doc => {
+                    if (doc.exists) {
+                        userData = doc.data();
+                        updateProfileUI();
+                        loadSavedVideos();
+                        loadRecentlyWatched();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading user data:', error);
+                });
+        }
+
+        // Update profile UI
+        function updateProfileUI() {
+            if (userData) {
+                const name = userData.name || 'User';
+                const email = userData.email || '';
+                const bio = userData.bio || '';
+                
+                userName.textContent = name;
+                profilePic.textContent = name.charAt(0).toUpperCase();
+                profilePicLarge.textContent = name.charAt(0).toUpperCase();
+                
+                profileName.value = name;
+                profileEmail.value = email;
+                profileBio.value = bio;
+            }
+        }
+
+        // Load profile data into modal
+        function loadProfileData() {
+            if (userData) {
+                profileName.value = userData.name || '';
+                profileEmail.value = userData.email || '';
+                profileBio.value = userData.bio || '';
+                renderRecentlyWatched();
+            }
+        }
+
+        // Save profile data to Firestore
+        function saveProfileData() {
+            if (!currentUser) return;
+            
+            const updatedData = {
+                name: profileName.value,
+                bio: profileBio.value,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            db.collection('users').doc(currentUser.uid).update(updatedData)
+                .then(() => {
+                    userData = { ...userData, ...updatedData };
+                    updateProfileUI();
+                    profileModal.style.display = 'none';
+                    alert('Profile updated successfully!');
+                })
+                .catch(error => {
+                    alert('Error updating profile: ' + error.message);
+                });
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
